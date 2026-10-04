@@ -1,0 +1,7 @@
+# Large dataset archives and backend services not needed for static frontend hosting
+archive/
+ml_service/
+backend/
+node_modules/
+*.pth
+*.pt
