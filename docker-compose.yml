@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  db:
+    image: mongo:latest
+    container_name: medical-triage-db
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - triage-network
+
+  ml_service:
+    build: ./ml_service
+    container_name: medical-triage-ml
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+      - HOST=0.0.0.0
+    networks:
+      - triage-network
+
+  backend:
+    build: ./backend
+    container_name: medical-triage-backend
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - MONGO_URI=mongodb://db:27017/medical_triage
+      - ML_SERVICE_URL=http://ml_service:8000
+    depends_on:
+      - db
+      - ml_service
+    networks:
+      - triage-network
+
+  frontend:
+    build: ./frontend
+    container_name: medical-triage-frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+    networks:
+      - triage-network
+
+networks:
+  triage-network:
+    driver: bridge
+
+volumes:
+  mongo-data:
